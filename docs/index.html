@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OI Surge Strategy</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d28;
+    --border: #2a2d3a;
+    --green: #22c55e;
+    --red: #ef4444;
+    --amber: #f59e0b;
+    --blue: #3b82f6;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+  .header {
+    text-align: center;
+    padding: 30px 0 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+  .header .sub { color: var(--muted); font-size: 14px; margin-top: 4px; }
+  .header .status-bar {
+    display: flex; justify-content: center; gap: 20px;
+    margin-top: 12px; font-size: 13px; color: var(--muted);
+  }
+  .signal-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .signal-card .badge {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .badge-trade { background: rgba(34,197,94,0.15); color: var(--green); }
+  .badge-skip { background: rgba(239,68,68,0.15); color: var(--red); }
+  .signal-card .strike {
+    font-size: 48px;
+    font-weight: 800;
+    letter-spacing: -1px;
+  }
+  .signal-card .strike .type {
+    font-size: 28px;
+    font-weight: 600;
+    opacity: 0.7;
+  }
+  .signal-card .meta {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .signal-card .meta-item { text-align: center; }
+  .signal-card .meta-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .signal-card .meta-value { font-size: 18px; font-weight: 700; margin-top: 2px; }
+  .signal-card .meta-value.up { color: var(--green); }
+  .signal-card .meta-value.down { color: var(--red); }
+  .signal-card .action {
+    margin-top: 20px;
+    padding: 10px 24px;
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    display: inline-block;
+  }
+  .signal-card .action.skip { background: var(--red); }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+  .info-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+  }
+  .info-card h3 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-row .val { font-weight: 600; }
+  .table-wrap {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .table-wrap h3 {
+    padding: 14px 18px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 10px 14px; color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; }
+  td { padding: 10px 14px; border-top: 1px solid rgba(255,255,255,0.04); }
+  .green { color: var(--green); }
+  .red { color: var(--red); }
+  .amber { color: var(--amber); }
+  .footer {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    padding: 30px 0;
+  }
+  .tag {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .tag-ok { background: rgba(34,197,94,0.15); color: var(--green); }
+  .tag-skip { background: rgba(239,68,68,0.15); color: var(--red); }
+  .skip-reason {
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--red);
+    margin-bottom: 20px;
+  }
+  .pulse {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    margin-right: 6px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+  .no-signal {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+  .no-signal h2 { font-size: 20px; margin-bottom: 8px; }
+  .tab-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .tab {
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+  .tab:hover { border-color: var(--blue); color: var(--text); }
+  .tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .page { display: none; }
+  .page.active { display: block; }
+  .glossary dt { font-weight: 600; margin-top: 10px; font-size: 14px; }
+  .glossary dd { font-size: 13px; color: var(--muted); margin-left: 0; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>OI Surge Strategy</h1>
+  <div class="sub">Daily Nifty Options Signal — Powered by Open Interest Analysis</div>
+  <div class="status-bar">
+    <span id="signalDate">—</span>
+    <span id="signalStatus">—</span>
+  </div>
+</div>
+
+<div class="tab-bar" id="tabBar">
+  <div class="tab active" data-tab="signal">Signal</div>
+  <div class="tab" data-tab="alternatives">Alternatives</div>
+  <div class="tab" data-tab="stats">Stats</div>
+  <div class="tab" data-tab="backtest">Backtest</div>
+  <div class="tab" data-tab="about">About</div>
+</div>
+
+<!-- SIGNAL PAGE -->
+<div class="page active" id="page-signal">
+
+  <div class="skip-reason" id="skipReason" style="display:none;"></div>
+
+  <div class="signal-card" id="signalCard">
+    <div class="badge badge-trade" id="signalBadge">TRADE</div>
+    <div class="strike" id="signalStrike">— <span class="type"></span></div>
+    <div class="meta">
+      <div class="meta-item">
+        <div class="meta-label">Entry</div>
+        <div class="meta-value" id="signalEntry">—</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Exit</div>
+        <div class="meta-value">3:30 PM IST</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Capital Needed</div>
+        <div class="meta-value" id="signalCapital">—</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">OI Change</div>
+        <div class="meta-value" id="signalOI">—</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Signal Strength</div>
+        <div class="meta-value" id="signalStrength">—</div>
+      </div>
+      <div class="meta-item">
+        <div class="meta-label">Premium Type</div>
+        <div class="meta-value" id="signalPremium">—</div>
+      </div>
+    </div>
+    <div class="action" id="signalAction">BUY 1 LOT AT 9:15 AM</div>
+  </div>
+
+  <div class="no-signal" id="noSignal" style="display:none;">
+    <h2>No Signal Available</h2>
+    <p>Today is not a trading day or the NSE data is unavailable.</p>
+  </div>
+
+  <div class="grid">
+    <div class="info-card">
+      <h3>Day of Week — Historical Win Rate</h3>
+      <div id="dayStats"></div>
+    </div>
+    <div class="info-card">
+      <h3>Signal Strength — Historical</h3>
+      <div id="strengthStats"></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="info-card">
+      <h3>OI Direction — Historical</h3>
+      <div id="directionStats"></div>
+    </div>
+    <div class="info-card">
+      <h3>Skip Rules</h3>
+      <div id="skipRules"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ALTERNATIVES PAGE -->
+<div class="page" id="page-alternatives">
+  <div class="table-wrap">
+    <h3>All Tradeable Strikes (OI ≥ 1,00,000)</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Strike</th>
+          <th>Type</th>
+          <th>OI Change</th>
+          <th>Entry ~</th>
+          <th>Capital</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="alternativesBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- STATS PAGE -->
+<div class="page" id="page-stats">
+  <div class="grid">
+    <div class="info-card">
+      <h3>Day of Week — Full Breakdown</h3>
+      <div id="dayBreakdown"></div>
+    </div>
+    <div class="info-card">
+      <h3>OI Direction — Full Breakdown</h3>
+      <div id="dirBreakdown"></div>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <h3>Signal Strength + Direction — Combined</h3>
+    <table>
+      <thead>
+        <tr><th>Pattern</th><th>Trades</th><th>Net P&L</th><th>Win Rate</th><th>Avg</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Extreme-Rise-PE</td><td>7</td><td class="green">+₹38,487</td><td>71.4%</td><td class="green">+₹5,498</td></tr>
+        <tr><td>Weak-Fall-CE</td><td>73</td><td class="green">+₹1,03,294</td><td>75.3%</td><td class="green">+₹1,415</td></tr>
+        <tr><td>Weak-Fall-PE</td><td>95</td><td class="green">+₹82,529</td><td>81.1%</td><td class="green">+₹869</td></tr>
+        <tr><td>Extreme-Rise-CE</td><td>5</td><td class="green">+₹12,070</td><td>80.0%</td><td class="green">+₹2,414</td></tr>
+        <tr><td>Moderate-Rise-PE</td><td>26</td><td class="green">+₹66,545</td><td>65.4%</td><td class="green">+₹2,559</td></tr>
+        <tr><td>Strong-Rise-PE</td><td>20</td><td class="green">+₹33,054</td><td>40.0%</td><td class="green">+₹1,653</td></tr>
+        <tr><td>Strong-Rise-CE</td><td>8</td><td class="green">+₹32,178</td><td>50.0%</td><td class="green">+₹4,022</td></tr>
+        <tr><td>Moderate-Rise-CE</td><td>19</td><td class="green">+₹23,579</td><td>52.6%</td><td class="green">+₹1,241</td></tr>
+        <tr><td style="background:rgba(239,68,68,0.08)">Weak-Rise-CE</td><td>4</td><td class="red">-₹7,471</td><td>0.0%</td><td class="red">-₹1,868</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- BACKTEST PAGE -->
+<div class="page" id="page-backtest">
+  <div class="table-wrap">
+    <h3>Results — ₹20k Daily Capital (Sep 2024 – Mar 2026)</h3>
+    <table>
+      <tbody>
+        <tr><td><strong>Total Trades</strong></td><td>260</td></tr>
+        <tr><td><strong>Net P&L</strong></td><td class="green">+₹4,00,114</td></tr>
+        <tr><td><strong>Win Rate</strong></td><td>70.4%</td></tr>
+        <tr><td><strong>Profit Factor</strong></td><td>17.12</td></tr>
+        <tr><td><strong>Avg Win</strong></td><td class="green">+₹2,322</td></tr>
+        <tr><td><strong>Avg Loss</strong></td><td class="red">-₹322</td></tr>
+        <tr><td><strong>Max Loss</strong></td><td class="red">-₹6,742</td></tr>
+        <tr><td><strong>Max Drawdown</strong></td><td class="red">-₹6,764</td></tr>
+        <tr><td><strong>Profitable Months</strong></td><td>19 / 19</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="table-wrap">
+    <h3>Monthly Breakdown</h3>
+    <table>
+      <thead><tr><th>Month</th><th>Trades</th><th>Net P&L</th><th>Win Rate</th></tr></thead>
+      <tbody>
+        <tr><td>2024-09</td><td>5</td><td class="green">+₹2,255</td><td>40.0%</td></tr>
+        <tr><td>2024-10</td><td>14</td><td class="green">+₹20,330</td><td>85.7%</td></tr>
+        <tr><td>2024-11</td><td>12</td><td class="green">+₹6,950</td><td>100%</td></tr>
+        <tr><td>2024-12</td><td>17</td><td class="green">+₹19,918</td><td>76.5%</td></tr>
+        <tr><td>2025-01</td><td>18</td><td class="green">+₹10,292</td><td>88.9%</td></tr>
+        <tr><td>2025-02</td><td>15</td><td class="green">+₹42,783</td><td>93.3%</td></tr>
+        <tr><td>2025-03</td><td>11</td><td class="green">+₹11,397</td><td>72.7%</td></tr>
+        <tr><td>2025-04</td><td>12</td><td class="green">+₹38,720</td><td>58.3%</td></tr>
+        <tr><td>2025-05</td><td>12</td><td class="green">+₹1,933</td><td>75.0%</td></tr>
+        <tr><td>2025-06</td><td>14</td><td class="green">+₹30,335</td><td>71.4%</td></tr>
+        <tr><td>2025-07</td><td>13</td><td class="green">+₹29,762</td><td>84.6%</td></tr>
+        <tr><td>2025-08</td><td>13</td><td class="green">+₹35,341</td><td>84.6%</td></tr>
+        <tr><td>2025-09</td><td>21</td><td class="green">+₹23,722</td><td>57.1%</td></tr>
+        <tr><td>2025-10</td><td>13</td><td class="green">+₹16,852</td><td>53.8%</td></tr>
+        <tr><td>2025-11</td><td>15</td><td class="green">+₹17,652</td><td>60.0%</td></tr>
+        <tr><td>2025-12</td><td>14</td><td class="green">+₹14,246</td><td>42.9%</td></tr>
+        <tr><td>2026-01</td><td>15</td><td class="green">+₹11,444</td><td>66.7%</td></tr>
+        <tr><td>2026-02</td><td>14</td><td class="green">+₹38,003</td><td>57.1%</td></tr>
+        <tr><td>2026-03</td><td>12</td><td class="green">+₹28,177</td><td>50.0%</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ABOUT PAGE -->
+<div class="page" id="page-about">
+  <div class="info-card">
+    <h3>How It Works</h3>
+    <dl class="glossary">
+      <dt>Signal Generation</dt>
+      <dd>At market close, fetch Nifty option chain from NSE. Compute OI change % for each strike: (Current OI − Previous OI) / Previous OI × 100. Filter strikes with OI ≥ 1,00,000. Pick the strike with highest absolute OI change %.</dd>
+      <dt>Execution</dt>
+      <dd>Next trading day, buy 1 lot (65 units) at 9:15 AM open. Sell at 3:30 PM close. Same-day only — no overnight hold.</dd>
+      <dt>Costs</dt>
+      <dd>Brokerage ₹20×2, STT 0.05%, Transaction charges 0.053%, GST 18%. Typical ₹50–₹150 per trade.</dd>
+      <dt>Skip Rules</dt>
+      <dd>Skip if entry >₹300 AND |OI%| > 300% (Extreme OI Trap). Skip if entry >₹1,500 AND OI% < -90% (OI Collapse).</dd>
+      <dt>Capital</dt>
+      <dd>₹20,000 daily limit. If entry premium exceeds ₹308, skip. No compounding — profits taken aside.</dd>
+    </dl>
+  </div>
+</div>
+
+<div class="footer">
+  OI Surge Strategy &middot; Data from NSE India &middot; For educational purposes only
+</div>
+
+<script src="signal.js"></script>
+<script>
+function fmt(x) { return x.toLocaleString('en-IN'); }
+
+function render() {
+  const d = SIGNAL_DATA;
+
+  if (d.status === 'no_data') {
+    document.getElementById('noSignal').style.display = 'block';
+    document.getElementById('signalCard').style.display = 'none';
+    document.getElementById('signalDate').textContent = '—';
+    document.getElementById('signalStatus').textContent = 'No data';
+    return;
+  }
+
+  document.getElementById('signalDate').textContent = d.generated;
+  document.getElementById('signalStatus').innerHTML = `<span class="pulse"></span>Live`;
+
+  const s = d.signal;
+  const tradeable = s.tradeable && d.affordable;
+
+  if (!tradeable) {
+    const reason = !d.affordable
+      ? `Capital insufficient: Need ₹${fmt(s.capital_needed)}, have ₹${fmt(d.daily_capital)}`
+      : s.skip_reason;
+    document.getElementById('skipReason').style.display = 'block';
+    document.getElementById('skipReason').textContent = 'SKIP: ' + reason;
+    document.getElementById('signalBadge').textContent = 'SKIP';
+    document.getElementById('signalBadge').className = 'badge badge-skip';
+    document.getElementById('signalAction').textContent = 'NO TRADE TODAY';
+    document.getElementById('signalAction').className = 'action skip';
+  } else {
+    document.getElementById('skipReason').style.display = 'none';
+    document.getElementById('signalBadge').textContent = 'TRADE';
+    document.getElementById('signalBadge').className = 'badge badge-trade';
+    document.getElementById('signalAction').textContent = 'BUY 1 LOT AT 9:15 AM';
+    document.getElementById('signalAction').className = 'action';
+  }
+
+  document.getElementById('signalStrike').innerHTML = s.strike.toFixed(0) + ' <span class="type">' + s.opt_type + '</span>';
+  document.getElementById('signalEntry').textContent = '~₹' + s.entry_price.toFixed(1);
+  document.getElementById('signalCapital').textContent = '₹' + fmt(s.capital_needed);
+  document.getElementById('signalOI').innerHTML = (s.oi_change_pct >= 0 ? '+' : '') + s.oi_change_pct.toFixed(1) + '% <span style="font-size:12px">(' + s.oi_direction + ')</span>';
+  document.getElementById('signalOI').className = 'meta-value ' + (s.oi_change_pct >= 0 ? 'up' : 'down');
+  document.getElementById('signalStrength').textContent = s.signal_strength;
+  document.getElementById('signalPremium').textContent = s.premium_category;
+
+  // Day stats
+  const dw = { Mon:['87.5%','+₹1,74,608'], Tue:['94.1%','+₹52,171'], Wed:['66.0%','+₹63,508'], Thu:['63.6%','+₹78,908'], Fri:['39.2%','+₹67,919'] };
+  let dwHtml = '';
+  for (const [day, [wr, pnl]] of Object.entries(dw)) {
+    const highlight = d.trade_day === day ? 'style="color:var(--blue);font-weight:700"' : '';
+    dwHtml += `<div class="info-row"><span ${highlight}>${day}</span><span class="val" ${highlight}>${wr} | ${pnl}</span></div>`;
+  }
+  document.getElementById('dayStats').innerHTML = dwHtml;
+
+  // Strength stats
+  const ss = { Weak:['77.1%','+₹1,94,200'], Moderate:['60.0%','+₹90,124'], Strong:['42.9%','+₹65,233'], Extreme:['75.0%','+₹50,557'] };
+  let ssHtml = '';
+  for (const [name, [wr, pnl]] of Object.entries(ss)) {
+    const highlight = s.signal_strength === name ? 'style="color:var(--blue);font-weight:700"' : '';
+    ssHtml += `<div class="info-row"><span ${highlight}>${name}</span><span class="val" ${highlight}>${wr} | ${pnl}</span></div>`;
+  }
+  document.getElementById('strengthStats').innerHTML = ssHtml;
+
+  // Direction stats
+  document.getElementById('directionStats').innerHTML = `
+    <div class="info-row"><span${s.oi_direction==='Rise'?' style="color:var(--blue);font-weight:700"':''}>OI Rise</span><span class="val">55.4% WR | ₹2,329 avg</span></div>
+    <div class="info-row"><span${s.oi_direction==='Fall'?' style="color:var(--blue);font-weight:700"':''}>OI Fall</span><span class="val">78.6% WR | ₹1,106 avg</span></div>
+  `;
+
+  // Skip rules
+  document.getElementById('skipRules').innerHTML = `
+    <div class="info-row"><span>Rule #1: entry >₹300, OI>300%</span><span class="val ${s.skip_extreme_trap ? 'red' : 'green'}">${s.skip_extreme_trap ? 'SKIP' : 'OK'}</span></div>
+    <div class="info-row"><span>Rule #2: entry >₹1,500, OI<-90%</span><span class="val ${s.skip_collapse ? 'red' : 'green'}">${s.skip_collapse ? 'SKIP' : 'OK'}</span></div>
+  `;
+
+  // Alternatives table
+  let altHtml = '';
+  for (const a of d.alternatives) {
+    const status = a.tradeable ? '<span class="tag tag-ok">OK</span>' : '<span class="tag tag-skip">SKIP</span>';
+    altHtml += `<tr><td>${a.strike.toFixed(0)}</td><td>${a.opt_type}</td><td class="${a.oi_change_pct >= 0 ? 'green' : 'red'}">${a.oi_change_pct >= 0 ? '+' : ''}${a.oi_change_pct.toFixed(1)}%</td><td>₹${a.entry_price.toFixed(1)}</td><td>₹${fmt(a.capital_needed)}</td><td>${status}</td></tr>`;
+  }
+  document.getElementById('alternativesBody').innerHTML = altHtml;
+
+  // Day breakdown
+  document.getElementById('dayBreakdown').innerHTML = `
+    <div class="info-row"><span>Monday</span><span class="val">56 trades, +₹1,74,608, 87.5% WR</span></div>
+    <div class="info-row"><span>Tuesday</span><span class="val">51 trades, +₹52,171, 94.1% WR</span></div>
+    <div class="info-row"><span>Wednesday</span><span class="val">47 trades, +₹26,508, 66.0% WR</span></div>
+    <div class="info-row"><span>Thursday</span><span class="val">55 trades, +₹78,908, 63.6% WR</span></div>
+    <div class="info-row"><span>Friday</span><span class="val">51 trades, +₹67,919, 39.2% WR</span></div>
+  `;
+
+  document.getElementById('dirBreakdown').innerHTML = `
+    <div class="info-row"><span>OI Rise</span><span class="val">92 trades, +₹2,14,290, 55.4% WR</span></div>
+    <div class="info-row"><span>OI Fall</span><span class="val">168 trades, +₹1,85,823, 78.6% WR</span></div>
+  `;
+}
+
+// Tab switching
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('page-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+render();
+</script>
+</body>
+</html>

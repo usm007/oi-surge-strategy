@@ -1,0 +1,39 @@
+name: OI Surge Daily Signal
+
+on:
+  schedule:
+    # 10:00 UTC = 15:30 IST, Mon-Fri
+    - cron: '0 10 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  PYTHONIOENCODING: utf-8
+
+jobs:
+  generate-signal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate signal and update index.html
+        run: python generate_signal.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "oi-surge-bot"
+          git config user.email "bot@oi-surge.local"
+          git add docs/index.html docs/signal.js
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "signal: daily OI Surge update"
+            git push
+          fi

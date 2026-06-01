@@ -1,0 +1,13 @@
+# Python build artifacts
+*.pyc
+__pycache__/
+build/
+dist/
+*.spec
+
+# Local signal cache
+*.json
+
+# IDE
+.vscode/
+.idea/
