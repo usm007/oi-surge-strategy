@@ -1,6 +1,6 @@
 const SIGNAL_DATA = {
   "status": "ok",
-  "generated": "2026-06-01 14:45",
+  "generated": "2026-06-01 14:46",
   "trade_date": "2026-06-02",
   "trade_day": "Tue",
   "daily_capital": 20000,
