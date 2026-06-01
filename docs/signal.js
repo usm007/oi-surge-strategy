@@ -1,11 +1,11 @@
 const SIGNAL_DATA = {
   "status": "ok",
-  "generated": "2026-06-01 14:46",
+  "generated": "2026-06-01 14:48",
   "trade_date": "2026-06-02",
   "trade_day": "Tue",
   "daily_capital": 20000,
   "affordable": true,
-  "underlying": 23415.4,
+  "underlying": 23427.15,
   "data_source": [
     "Rise"
   ],
@@ -15,7 +15,7 @@ const SIGNAL_DATA = {
     "expiry": "02-Jun-2026",
     "entry_price": 61.5,
     "prev_close": 61.55,
-    "oi_change_pct": 38.97,
+    "oi_change_pct": 35.94,
     "oi_direction": "Rise",
     "signal_strength": "Weak",
     "premium_category": "Mild OTM",
@@ -30,7 +30,7 @@ const SIGNAL_DATA = {
     {
       "strike": 23500.0,
       "opt_type": "PE",
-      "oi_change_pct": 38.97,
+      "oi_change_pct": 35.94,
       "entry_price": 61.55,
       "capital_needed": 4000.75,
       "tradeable": true
@@ -38,7 +38,7 @@ const SIGNAL_DATA = {
     {
       "strike": 23200.0,
       "opt_type": "PE",
-      "oi_change_pct": 32.28,
+      "oi_change_pct": 31.92,
       "entry_price": 14.4,
       "capital_needed": 936.0,
       "tradeable": true
