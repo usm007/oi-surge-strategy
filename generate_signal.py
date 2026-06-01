@@ -253,8 +253,11 @@ def main():
         print(f"  Capital: NEED Rs{s['capital_needed']:,.0f} > HAVE Rs{capital:,.0f}")
 
     # Inject into signal.js
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    html_path = os.path.join(script_dir, "docs", "index.html")
+    if getattr(sys, 'frozen', False):
+        target_dir = os.getcwd()
+    else:
+        target_dir = os.path.dirname(os.path.abspath(__file__))
+    html_path = os.path.join(target_dir, "docs", "index.html")
     inject_into_html(html_path, data)
     print(f"  Written to docs/signal.js")
     print("=" * 48)
