@@ -1,47 +1,55 @@
 const SIGNAL_DATA = {
   "status": "ok",
-  "generated": "2026-07-01 12:37",
-  "trade_date": "2026-07-02",
-  "trade_day": "Thu",
+  "generated": "2026-07-02 12:11",
+  "trade_date": "2026-07-03",
+  "trade_day": "Fri",
   "daily_capital": 20000,
   "affordable": true,
-  "underlying": 24005.85,
+  "underlying": 24175.7,
   "data_source": [
     "Rise",
     "Fall"
   ],
   "signal": {
-    "strike": 24000.0,
+    "strike": 25000.0,
     "opt_type": "PE",
-    "expiry": "07-Jul-2026",
-    "entry_price": 139.8,
-    "prev_close": 139.85,
-    "oi_change_pct": 61.98,
+    "expiry": "28-Jul-2026",
+    "entry_price": 48.6,
+    "prev_close": 48.6,
+    "oi_change_pct": 6.96,
     "oi_direction": "Rise",
     "signal_strength": "Weak",
-    "premium_category": "Mild OTM",
-    "capital_needed": 9090.25,
+    "premium_category": "Deep OTM",
+    "capital_needed": 3159.0,
     "tradeable": true,
     "skip_extreme_trap": false,
     "skip_collapse": false,
     "skip_reason": "",
-    "estimated_costs": 63.32
+    "estimated_costs": 52.8
   },
   "alternatives": [
     {
-      "strike": 24000.0,
+      "strike": 25000.0,
       "opt_type": "PE",
-      "oi_change_pct": 61.98,
-      "entry_price": 139.85,
-      "capital_needed": 9090.25,
+      "oi_change_pct": 6.96,
+      "entry_price": 48.6,
+      "capital_needed": 3159.0,
       "tradeable": true
     },
     {
-      "strike": 24000.0,
+      "strike": 0.0,
       "opt_type": "PE",
-      "oi_change_pct": 5.21,
-      "entry_price": 358.8,
-      "capital_needed": 23322.0,
+      "oi_change_pct": 3.12,
+      "entry_price": 1017.9,
+      "capital_needed": 66163.5,
+      "tradeable": false
+    },
+    {
+      "strike": 0.0,
+      "opt_type": "PE",
+      "oi_change_pct": 2.94,
+      "entry_price": 1386.9,
+      "capital_needed": 90148.5,
       "tradeable": false
     }
   ]
